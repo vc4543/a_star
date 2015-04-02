@@ -49,33 +49,21 @@ BSD Makefile for automatically creating `.js` files from `.ts` files:
 Main browser files:
 - `astar.html`, `astar.css`
 
-Wrapper files for the browser-based interfaces:
-- `shrdlite-html.ts`, `shrdlite-ajax.ts`
-
-Wrapper files for the Node.JS-based interfaces:
-- `shrdlite-ansi.ts`, `shrdlite-offline.ts`
+Wrapper file for the browser-based interfaces:
+- `astar-html.ts`
 
 Main TypeScript module:
-- `Shrdlite.ts`
+- `Astar.ts`
 
 TypeScript interfaces and classes for the different implementations of the blocks world:
-- `World.ts`, `SVGWorld.ts`, `TextWorld.ts`, `ANSIWorld.ts`, `ExampleWorlds.ts`
+- `Puzzle.ts`, `SVGPuzzle.ts`, `ExamplePuzzles.ts`
 
 TypeScript modules for parsing, interpretation and planning:
 - `Parser.ts`, `Interpreter.ts`, `Planner.ts`
 
-Grammar files used by the Nearley chartparser:
-- `grammar.js`, `grammar.ne`
-
-Example CGI script that is called by the Ajax web interface:
-- `cgi-bin/shrdlite_cgi.py`
-
 TypeScript declaration files for non-TypeScript libraries:
-- `lib/jquery.d.ts`, `lib/node.d.ts`
+- `lib/jquery.d.ts`
 
 External Javascript libraries:
-- `lib/jquery-1.11.0.min.js`, `lib/nearley.js`
-
-Assorted documentation (currently only the TypeScript language definition):
-- `doc`
+- `lib/jquery-1.11.0.min.js`
 

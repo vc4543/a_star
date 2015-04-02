@@ -1,4 +1,5 @@
 ///<reference path="Puzzle.ts"/>
+///<reference path="Parser.ts"/>
 ///<reference path="Planner.ts"/>
 
 module Astar {
@@ -31,9 +32,23 @@ module Astar {
 
     export function parseUtteranceIntoPlan(puzzle : Puzzle, utterance : string) : string[] {
         puzzle.printDebugInfo('Parsing utterance: "' + utterance + '"');
+        try {
+            var parses : Parser.Result[] = Parser.parse(utterance);
+        } catch(err) {
+            if (err instanceof Parser.Error) {
+                puzzle.printError("Parsing error", err.message);
+                return;
+            } else {
+                throw err;
+            }
+        }
+        puzzle.printDebugInfo("Found " + parses.length + " parses");
+        parses.forEach((res, n) => {
+            puzzle.printDebugInfo("  (" + n + ") " + Parser.parseToString(res));
+        });
 
         try {
-            var interpretations : Interpreter.Result[] = Interpreter.interpret(puzzle.currentState);
+            var interpretations : Interpreter.Result[] = Interpreter.interpret(parses, puzzle.currentState);
         } catch(err) {
             if (err instanceof Interpreter.Error) {
                 puzzle.printError("Interpretation error", err.message);

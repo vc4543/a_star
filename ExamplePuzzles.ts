@@ -4,37 +4,48 @@ var ExamplePuzzles : {[s:string]: PuzzleState} = {};
 
 
 ExamplePuzzles["8queens"] = {
-    "stacks": [["e"],["a","l"],["i","h","j"],["c","k","g","b"],["d","m","f"]],
+    "stacks": [["a"],["b"],["c"],["d"],["e"],["f"],["g"],["h"]],
     "holding": null,
     "arm": 0,
     "objects": {
-        "a": { "form":"brick",   "size":"large",  "color":"yellow" },
-        "b": { "form":"brick",   "size":"small",  "color":"white" },
-        "c": { "form":"plank",   "size":"large",  "color":"red"   },
-        "d": { "form":"plank",   "size":"small",  "color":"green" },
-        "e": { "form":"ball",    "size":"large",  "color":"white" },
-        "f": { "form":"ball",    "size":"small",  "color":"black" },
-        "g": { "form":"table",   "size":"large",  "color":"blue"  },
-        "h": { "form":"table",   "size":"small",  "color":"red"   },
-        "i": { "form":"pyramid", "size":"large",  "color":"yellow"},
-        "j": { "form":"pyramid", "size":"small",  "color":"red"   },
-        "k": { "form":"box",     "size":"large",  "color":"yellow"},
-        "l": { "form":"box",     "size":"large",  "color":"red"   },
-        "m": { "form":"box",     "size":"small",  "color":"blue"  }
+        "a": { "form":"ball",   "size":"large",  "color":"white" },
+        "b": { "form":"ball",   "size":"large",  "color":"white" },
+        "c": { "form":"ball",   "size":"large",  "color":"white" },
+        "d": { "form":"ball",   "size":"large",  "color":"white" },
+        "e": { "form":"ball",   "size":"large",  "color":"white" },
+        "f": { "form":"ball",   "size":"large",  "color":"white" },
+        "g": { "form":"ball",   "size":"large",  "color":"white" },
+        "h": { "form":"ball",   "size":"large",  "color":"white" },
+        "x": { "form":"brick",   "size":"large", "color":"green" },
     },
     "examples": [
-        "put a box in a box",
-        "put all balls on the floor",
-        "take the yellow box",
-        "put any object under all tables",
-        "put any object under all tables on the floor",
-        "put a ball in a small box in a large box",
-        "put all balls in a large box",
-        "put all balls left of a ball",
-        "put all balls beside a ball",
-        "put all balls beside every ball",
-        "put a box beside all objects",
-        "put all red objects above a yellow object on the floor",
-        "put all yellow objects under a red object under an object"
+        "solve",
+//        "random",
+    ]
+};
+
+ExamplePuzzles["13queens"] = {
+    "stacks": [["a"],["b"],["c"],["d"],["e"],["f"],["g"],["h"],["i"],["j"],["k"],["l"],["m"]],
+    "holding": null,
+    "arm": 0,
+    "objects": {
+        "a": { "form":"ball",   "size":"large",  "color":"white" },
+        "b": { "form":"ball",   "size":"large",  "color":"white" },
+        "c": { "form":"ball",   "size":"large",  "color":"white" },
+        "d": { "form":"ball",   "size":"large",  "color":"white" },
+        "e": { "form":"ball",   "size":"large",  "color":"white" },
+        "f": { "form":"ball",   "size":"large",  "color":"white" },
+        "g": { "form":"ball",   "size":"large",  "color":"white" },
+        "h": { "form":"ball",   "size":"large",  "color":"white" },
+        "i": { "form":"ball",   "size":"large",  "color":"white" },
+        "j": { "form":"ball",   "size":"large",  "color":"white" },
+        "k": { "form":"ball",   "size":"large",  "color":"white" },
+        "l": { "form":"ball",   "size":"large",  "color":"white" },
+        "m": { "form":"ball",   "size":"large",  "color":"white" },
+        "x": { "form":"brick",   "size":"large", "color":"green" },
+    },
+    "examples": [
+        "solve",
+//        "random",
     ]
 };

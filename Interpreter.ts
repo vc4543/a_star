@@ -1,17 +1,18 @@
 ///<reference path="Puzzle.ts"/>
+///<reference path="Parser.ts"/>
 
 module Interpreter {
 
     //////////////////////////////////////////////////////////////////////
     // exported functions, classes and interfaces/types
 
-    export function interpret(currentState : PuzzleState) : Result[] {
+    export function interpret(parses : Parser.Result[], currentState : PuzzleState) : Result[] {
         var interpretations : Result[] = [];
-//        parses.forEach((parseresult) => {
-//            var intprt : Result = <Result>parseresult;
-//            intprt.intp = interpretCommand(intprt.prs, currentState);
-//            interpretations.push(intprt);
-//        });
+        parses.forEach((parseresult) => {
+            var intprt : Result = <Result>parseresult;
+            intprt.intp = interpretCommand(intprt.prs, currentState);
+            interpretations.push(intprt);
+        });
         if (interpretations.length) {
             return interpretations;
         } else {
@@ -20,7 +21,7 @@ module Interpreter {
     }
 
 
-    export interface Result {intp:Literal[][];}
+    export interface Result extends Parser.Result {intp:Literal[][];}
     export interface Literal {pol:boolean; rel:string; args:string[];}
 
 
@@ -45,17 +46,13 @@ module Interpreter {
     //////////////////////////////////////////////////////////////////////
     // private functions
 
-//    function interpretCommand(cmd : Parser.Command, state : WorldState) : Literal[][] {
-        // This returns a dummy interpretation involving two random objects in the world
-//        var objs : string[] = Array.prototype.concat.apply([], state.stacks);
-//       var a = objs[getRandomInt(objs.length)];
-//        var b = objs[getRandomInt(objs.length)];
-//        var intprt : Literal[][] = [[
-//            {pol: true, rel: "ontop", args: [a, "floor"]},
-//            {pol: true, rel: "holding", args: [b]}
-//        ]];
-//        return intprt;
-//    }
+    function interpretCommand(cmd : Parser.Command, state : PuzzleState) : Literal[][] {
+        var objs : string[] = Array.prototype.concat.apply([], state.stacks);
+        var intprt : Literal[][] = [[
+            {pol: true, rel: cmd.cmd, args: []}
+        ]];
+        return intprt;
+    }
 
 
     function getRandomInt(max) {

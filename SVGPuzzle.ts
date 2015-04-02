@@ -172,17 +172,11 @@ class SVGPuzzle implements Puzzle {
 
     private objectData = {
         brick: {small: {width:0.30, height:0.30},
-                large: {width:0.70, height:0.60}},
-        plank: {small: {width:0.60, height:0.10},
-                large: {width:1.00, height:0.15}},
+                large: {width:0.70, height:0.70}},
         ball: {small: {width:0.30, height:0.30},
                large: {width:0.70, height:0.70}},
-        pyramid: {small: {width:0.60, height:0.25},
-                  large: {width:1.00, height:0.40}},
         box: {small: {width:0.60, height:0.30, thickness: 0.10},
               large: {width:1.00, height:0.40, thickness: 0.10}},
-        table: {small: {width:0.60, height:0.30, thickness: 0.10},
-                large: {width:1.00, height:0.40, thickness: 0.10}},
     };
 
     private stackWidth() : number {
@@ -216,7 +210,7 @@ class SVGPuzzle implements Puzzle {
     // The basic actions: left, right, pick, drop
 
     private getAction(act) {
-        var actions = {p:this.pick, d:this.drop, l:this.left, r:this.right};
+        var actions = {p:this.pick, d:this.drop, l:this.left, r:this.right, a:this.add};
         return actions[act.toLowerCase()];
     }
 
@@ -249,6 +243,15 @@ class SVGPuzzle implements Puzzle {
         }
         this.currentState.holding = this.currentState.stacks[this.currentState.arm].pop();
         this.verticalMove('pick', callback);
+    }
+
+    private add(callback?) {
+        if (!this.currentState.holding) {
+            throw "Not holding anything!";
+        }
+        this.currentState.stacks[this.currentState.arm].push("x");
+        var duration = 3 / this.armSpeed;
+        if (callback) setTimeout(callback, (duration + this.animationPause) * 1000);
     }
 
     //////////////////////////////////////////////////////////////////////
@@ -349,7 +352,6 @@ class SVGPuzzle implements Puzzle {
         var object;
         switch (attrs.form) {
         case 'brick':
-        case 'plank':
             object = $(this.SVG('rect')).attr({
                 x: xleft,
                 y: ytop,
@@ -365,26 +367,10 @@ class SVGPuzzle implements Puzzle {
                 ry: yradius
             });
             break;
-        case 'pyramid':
-            var points = [xleft, ybottom, xmidleft, ytop, xmidright, ytop, xright, ybottom];
-            object = $(this.SVG('polygon')).attr({
-                points: points.join(" ")
-            });
-            break;
         case 'box':
             var points = [xleft, ytop, xleft, ybottom, xright, ybottom, xright, ytop,
                           xright-dim.thickness, ytop, xright-dim.thickness, ybottom-dim.thickness,
                           xleft+dim.thickness, ybottom-dim.thickness, xleft+dim.thickness, ytop];
-            object = $(this.SVG('polygon')).attr({
-                points: points.join(" ")
-            });
-            break;
-        case 'table':
-            var points = [xleft, ytop, xright, ytop, xright, ytop+dim.thickness,
-                          xmidright, ytop+dim.thickness, xmidright, ybottom,
-                          xmidright-dim.thickness, ybottom, xmidright-dim.thickness, ytop+dim.thickness,
-                          xmidleft+dim.thickness, ytop+dim.thickness, xmidleft+dim.thickness, ybottom,
-                          xmidleft, ybottom, xmidleft, ytop+dim.thickness, xleft, ytop+dim.thickness];
             object = $(this.SVG('polygon')).attr({
                 points: points.join(" ")
             });
