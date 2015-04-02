@@ -3,7 +3,7 @@
 ///<reference path="ExamplePuzzles.ts"/>
 ///<reference path="lib/jquery.d.ts" />
 
-var defaultPuzzle = 'small';
+var defaultPuzzle = '8queens';
 
 $(function(){
     var current = getURLParameter('puzzle');
