@@ -59,36 +59,42 @@ module Planner {
                 }
             var nextState : PuzzleState = frontier[mi];
             if(goal(nextState)) {
+                var statearm = state.arm;
+                var pickstack = -1;
                 do {
-                    var pickstack = getRandomInt(state.stacks.length);
+                    ++pickstack;
                 } while (state.stacks[pickstack].length == 0);
+                while(pickstack < state.stacks.length) {
+                    if(state.stacks[pickstack].length != nextState.stacks[pickstack].length) {
+                        // First move the arm to the position
+                        if (pickstack < statearm) {
+                            plan.push("Moving left");
+                            for (var i = statearm; i > pickstack; i--) {
+                                plan.push("l");
+                            }
+                        } else if (pickstack > state.arm) {
+                            plan.push("Moving right");
+                            for (var i = statearm; i < pickstack; i++) {
+                                plan.push("r");
+                            }
+                        }
+                        statearm = pickstack;
+                        // Then pick up the object
+                        var obj = state.stacks[pickstack][state.stacks[pickstack].length-1];
+                        plan.push("Picking up the " + state.objects[obj].form,
+                                  "p");
 
-                // First move the arm to the leftmost nonempty stack
-                if (pickstack < state.arm) {
-                    plan.push("Moving left");
-                    for (var i = state.arm; i > pickstack; i--) {
-                        plan.push("l");
+                        // Raising it up
+                        plan.push("Raising the " + state.objects[obj].form);
+                        for (var i = state.stacks[pickstack].length; i < nextState.stacks[pickstack].length; i++)
+                            plan.push("a");
+
+                        // Finally put it down again
+                        plan.push("Dropping the " + state.objects[obj].form,
+                                  "d");
                     }
-                } else if (pickstack > state.arm) {
-                    plan.push("Moving right");
-                    for (var i = state.arm; i < pickstack; i++) {
-                        plan.push("r");
-                    }
+                    pickstack++;
                 }
-
-                // Then pick up the object
-                var obj = state.stacks[pickstack][state.stacks[pickstack].length-1];
-                plan.push("Picking up the " + state.objects[obj].form,
-                          "p");
-
-                // Raising up
-                plan.push("Raising the " + state.objects[obj].form,
-                          "a");
-
-                // Finally put it down again
-                plan.push("Dropping the " + state.objects[obj].form,
-                          "d");
-
                 return plan;
             }
             var solvingI = nextState.InitialCost;
