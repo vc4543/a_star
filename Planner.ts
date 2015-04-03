@@ -58,45 +58,8 @@ module Planner {
                         mi = i;
                 }
             var nextState : PuzzleState = frontier[mi];
-            if(goal(nextState)) {
-                var statearm = state.arm;
-                var pickstack = -1;
-                do {
-                    ++pickstack;
-                } while (state.stacks[pickstack].length == 0);
-                while(pickstack < state.stacks.length) {
-                    if(state.stacks[pickstack].length != nextState.stacks[pickstack].length) {
-                        // First move the arm to the position
-                        if (pickstack < statearm) {
-                            plan.push("Moving left");
-                            for (var i = statearm; i > pickstack; i--) {
-                                plan.push("l");
-                            }
-                        } else if (pickstack > state.arm) {
-                            plan.push("Moving right");
-                            for (var i = statearm; i < pickstack; i++) {
-                                plan.push("r");
-                            }
-                        }
-                        statearm = pickstack;
-                        // Then pick up the object
-                        var obj = state.stacks[pickstack][state.stacks[pickstack].length-1];
-                        plan.push("Picking up the " + state.objects[obj].form,
-                                  "p");
-
-                        // Raising it up
-                        plan.push("Raising the " + state.objects[obj].form);
-                        for (var i = state.stacks[pickstack].length; i < nextState.stacks[pickstack].length; i++)
-                            plan.push("a");
-
-                        // Finally put it down again
-                        plan.push("Dropping the " + state.objects[obj].form,
-                                  "d");
-                    }
-                    pickstack++;
-                }
-                return plan;
-            }
+            if(goal(nextState))
+                return planFor(nextState, state);
             var solvingI = nextState.InitialCost;
             for(var i=0; i < solvingI; ++i)
                 if(state.stacks[solvingI].length == 0)
@@ -107,7 +70,7 @@ module Planner {
             for(var j = aState.stacks[solvingI].length; j < 8; j++) {
                 aState = clone(aState);
                 aState.stacks[solvingI].push("x");
-                if(!isAttacked(aState, 0, solvingI+1)) { //prune
+                if(!canBeAttacked(aState, solvingI)) { //prune
                     frontier.push(aState);
                     cost.push(getCostOfState(aState));
                 }
@@ -122,18 +85,50 @@ module Planner {
             frontier = newfrontier;
             cost = newcost;
 
-
-        if(solvingI>6) {
-            plan.push("Moving right as I debug "+mi+" "+frontier.length+" "+solvingI);
-            plan.push("r");
-            plan.push("Moving left as I debug "+mn+" ");
-            plan.push("l");
-            return plan;
-        }
-
         } while(frontier.length > 0);
         plan.push("Moving right as I couldnt finish "+mi+" "+frontier.length);
         plan.push("r");
+        return plan;
+    }
+
+    function planFor(nextState : PuzzleState, state: PuzzleState) {
+        var plan : string[] = [];
+        var statearm = state.arm;
+        var pickstack = -1;
+        do {
+            ++pickstack;
+        } while (state.stacks[pickstack].length == 0);
+        while(pickstack < state.stacks.length) {
+            if(state.stacks[pickstack].length != nextState.stacks[pickstack].length) {
+                // First move the arm to the position
+                if (pickstack < statearm) {
+                    plan.push("Moving left");
+                    for (var i = statearm; i > pickstack; i--) {
+                        plan.push("l");
+                    }
+                } else if (pickstack > state.arm) {
+                    plan.push("Moving right");
+                    for (var i = statearm; i < pickstack; i++) {
+                        plan.push("r");
+                    }
+                }
+                statearm = pickstack;
+                // Then pick up the object
+                var obj = state.stacks[pickstack][state.stacks[pickstack].length-1];
+                plan.push("Picking up the " + state.objects[obj].form,
+                          "p");
+
+                // Raising it up
+                plan.push("Raising the " + state.objects[obj].form);
+                for (var i = state.stacks[pickstack].length; i < nextState.stacks[pickstack].length; i++)
+                    plan.push("a");
+
+                // Finally put it down again
+                plan.push("Dropping the " + state.objects[obj].form,
+                          "d");
+            }
+            pickstack++;
+        }
         return plan;
     }
 
@@ -143,6 +138,21 @@ module Planner {
             if(isAttacked(state, i, state.stacks.length))
                 ++cost; // You have to move it if its attacked
         return cost;
+    }
+
+    function canBeAttacked(state : PuzzleState, i:number): Boolean {
+        for(var j = 0; j < i; j++) // horizontal attacks
+          if(state.stacks[j].length != 0)
+            if(state.stacks[i].length == state.stacks[j].length)
+                return true;
+        for(var j = 0; j < i; j++) // Diagonal up
+          if(state.stacks[j].length != 0)
+            if(state.stacks[i].length == state.stacks[j].length + (j-i))
+                return true;
+        for(var j = 0; j < i; j++) // Diagonal down
+          if(state.stacks[j].length != 0)
+            if(state.stacks[i].length == state.stacks[j].length - (j-i))
+                return true;
     }
 
     function isAttacked(state : PuzzleState, i:number, mx:number): Boolean {
