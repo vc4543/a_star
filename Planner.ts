@@ -40,50 +40,145 @@ module Planner {
     // private functions
 
     function planInterpretation(intprt : Interpreter.Literal[][], state : PuzzleState) : string[] {
-
-        PuzzleState[] frontier = [];
-        number[] cost = [];
-
-
-
-
-        do {
-            var pickstack = getRandomInt(state.stacks.length);
-        } while (state.stacks[pickstack].length == 0);
         var plan : string[] = [];
+        var mn = 10000;
+        var mi = 0;
+        var newfrontier : PuzzleState[] = [];
+        var newcost : number[] = [];
 
-        // First move the arm to the leftmost nonempty stack
-        if (pickstack < state.arm) {
-            plan.push("Moving left");
-            for (var i = state.arm; i > pickstack; i--) {
-                plan.push("l");
+        state.InitialCost = 1; //initial path cost
+        var frontier : PuzzleState[] = [state];
+        var cost : number[] = [getCostOfState(state)];
+
+        // the aStar part , kind of rudimentary as I need to finish TODAY!!! and I dont know tyepscript...
+        do {
+           for (var i = 0; i < cost.length; i++)
+                if(cost[i] < mn) {
+                        mn = cost[i];
+                        mi = i;
+                }
+            var nextState : PuzzleState = frontier[mi];
+            if(goal(nextState)) {
+                do {
+                    var pickstack = getRandomInt(state.stacks.length);
+                } while (state.stacks[pickstack].length == 0);
+
+                // First move the arm to the leftmost nonempty stack
+                if (pickstack < state.arm) {
+                    plan.push("Moving left");
+                    for (var i = state.arm; i > pickstack; i--) {
+                        plan.push("l");
+                    }
+                } else if (pickstack > state.arm) {
+                    plan.push("Moving right");
+                    for (var i = state.arm; i < pickstack; i++) {
+                        plan.push("r");
+                    }
+                }
+
+                // Then pick up the object
+                var obj = state.stacks[pickstack][state.stacks[pickstack].length-1];
+                plan.push("Picking up the " + state.objects[obj].form,
+                          "p");
+
+                // Raising up
+                plan.push("Raising the " + state.objects[obj].form,
+                          "a");
+
+                // Finally put it down again
+                plan.push("Dropping the " + state.objects[obj].form,
+                          "d");
+
+                return plan;
             }
-        } else if (pickstack > state.arm) {
-            plan.push("Moving right");
-            for (var i = state.arm; i < pickstack; i++) {
-                plan.push("r");
+            var solvingI = nextState.InitialCost;
+            for(var i=0; i < solvingI; ++i)
+                if(state.stacks[solvingI].length == 0)
+                    solvingI++;
+            var fl : number = frontier.length;
+            var aState : PuzzleState = clone(nextState);
+            ++aState.InitialCost;//path cost
+            for(var j = aState.stacks[solvingI].length; j < 8; j++) {
+                aState = clone(aState);
+                aState.stacks[solvingI].push("x");
+                if(!isAttacked(aState, 0, solvingI+1)) { //prune
+                    frontier.push(aState);
+                    cost.push(getCostOfState(aState));
+                }
             }
+            newfrontier = [];
+            newcost = [];
+            for (var i = 0; i < cost.length; i++)
+               if(i != mi) {
+                    newfrontier.push(frontier[i]);
+                    newcost.push(cost[i]);
+               }
+            frontier = newfrontier;
+            cost = newcost;
+
+
+        if(solvingI>6) {
+            plan.push("Moving right as I debug "+mi+" "+frontier.length+" "+solvingI);
+            plan.push("r");
+            plan.push("Moving left as I debug "+mn+" ");
+            plan.push("l");
+            return plan;
         }
 
-        // Then pick up the object
-        var obj = state.stacks[pickstack][state.stacks[pickstack].length-1];
-        plan.push("Picking up the " + state.objects[obj].form,
-                  "p");
-
-        // Raising up
-        plan.push("Raising the " + state.objects[obj].form,
-                  "a");
-
-        // Finally put it down again
-        plan.push("Dropping the " + state.objects[obj].form,
-                  "d");
-
+        } while(frontier.length > 0);
+        plan.push("Moving right as I couldnt finish "+mi+" "+frontier.length);
+        plan.push("r");
         return plan;
     }
 
+    function getCostOfState(state : PuzzleState) {
+        var cost : number = state.InitialCost
+        for(var i = 0; i < state.stacks.length; i++)
+            if(isAttacked(state, i, state.stacks.length))
+                ++cost; // You have to move it if its attacked
+        return cost;
+    }
+
+    function isAttacked(state : PuzzleState, i:number, mx:number): Boolean {
+        if(state.stacks[i].length == 0)
+            return false;
+        for(var j = i + 1; j < mx; j++) // horizontal attacks
+          if(state.stacks[j].length != 0)
+            if(state.stacks[i].length == state.stacks[j].length)
+                return true;
+        for(var j = i + 1; j < mx; j++) // Diagonal up
+          if(state.stacks[j].length != 0)
+            if(state.stacks[i].length == state.stacks[j].length + (j-i))
+                return true;
+        for(var j = i + 1; j < mx; j++) // Diagonal down
+          if(state.stacks[j].length != 0)
+            if(state.stacks[i].length == state.stacks[j].length - (j-i))
+                return true;
+    }
+
+    function goal(state : PuzzleState): Boolean {
+        for(var i = 0; i < state.stacks.length; i++)
+            if(isAttacked(state, i, state.stacks.length))
+                return false;
+        return true;
+    }
 
     function getRandomInt(max) {
         return Math.floor(Math.random() * max);
+    }
+
+    function clone<T>(obj: T): T {
+        if (obj != null && typeof obj == "object") {
+            var result : T = obj.constructor();
+            for (var key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    result[key] = clone(obj[key]);
+                }
+            }
+            return result;
+        } else {
+            return obj;
+        }
     }
 
 }

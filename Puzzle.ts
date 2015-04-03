@@ -8,6 +8,7 @@ interface ObjectDefinition {
 }
 
 interface PuzzleState {
+    InitialCost: number;
     stacks: string[][];
     holding: string;
     arm: number;
