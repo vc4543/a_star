@@ -51,9 +51,9 @@ module Planner {
     }
 
     class QueensSearch implements Searcher.searchInterface {
-	constructor(
-		public aState: PuzzleState
-	) {this.currentState = clone(aState); this.currentState.InitialCost = 0; console.log('start');}
+        constructor(
+            public aState: PuzzleState
+        ) {this.currentState = clone(aState); this.currentState.InitialCost = 0; console.log('start');}
 
         public currentState : PuzzleState;
         private frontier : PuzzleState[] = [];
@@ -64,41 +64,47 @@ module Planner {
 	            if(this.isAttacked(this.currentState, i, this.currentState.stacks.length))
 	                ++cost; // You have to move it if its attacked
 	        return cost;
-	}
+        }
         isGoalCurrentState(): Boolean {
-		for(var i = 0; i < this.currentState.stacks.length; i++)
-		    if(this.isAttacked(this.currentState, i, this.currentState.stacks.length))
-		        return false;
-		return true;
- 	}
+            for(var i = 0; i < this.currentState.stacks.length; i++)
+                if(this.isAttacked(this.currentState, i, this.currentState.stacks.length))
+                    return false;
+            return true;
+        }
 
-        saveCurrentStateIntoFrontier(): void {this.frontier.push(this.currentState);};
+        saveCurrentStateIntoFrontier(): void {this.frontier.push(this.currentState);}
+
         nextChildAndMakeCurrent(): Boolean {
-            var solvingI = this.currentState.InitialCost;
-            for(var i=0; i < solvingI; ++i)
-                if(this.currentState.stacks[solvingI].length == 0)
+            var solvingI = this.currentState.InitialCost + 1;
+            for(var i=0; i <= solvingI; ++i)
+                if(this.currentState.stacks[solvingI].length == 0) {
+                    console.log('skipping one');
                     solvingI++;
+                }
             this.currentState = clone(this.currentState);
-            ++this.currentState.InitialCost;
-console.log('checking '+this.currentState.InitialCost);
-	    if(this.currentState.InitialCost>this.currentState.stacks.length)
-		return false;
-	    return this.nextSiblingAndMakeCurrent();
-	}
+            this.currentState.InitialCost = solvingI;
+            if(this.currentState.InitialCost>this.currentState.stacks.length) {
+                console.log('out of stack length');
+                return false;
+            }
+            return this.nextSiblingAndMakeCurrent();
+        }
+
         nextSiblingAndMakeCurrent(): Boolean {
-	    var aState : PuzzleState = clone(this.currentState);
+            var aState : PuzzleState = clone(this.currentState);
             var solvingI = this.currentState.InitialCost;
             for(var j = aState.stacks[solvingI].length; j < 8; j++) {
                 aState.stacks[solvingI].push("x");
                 if(!this.canBeAttacked(aState, solvingI)) { //prune
-		    this.currentState = aState;
-console.log('child col ' +solvingI + ' pos ' + aState.stacks[solvingI].length);
-		    return true;
+                    this.currentState = aState;
+                    return true;
                 }
             }
-	    return false;
-	}
+            return false;
+        }
+
         deleteFrontierElement(inx: number): void {this.frontier.splice(inx,1);}
+
         setCurrentStateFromFrontier(inx: number): void {this.currentState=this.frontier[inx];}
 
         maximumCostValue(): number {return 10000;}
@@ -106,38 +112,37 @@ console.log('child col ' +solvingI + ' pos ' + aState.stacks[solvingI].length);
 
         printDebugInfo(info : string) : void {console.log(info);}
 
-	canBeAttacked(state : PuzzleState, i:number): Boolean {
-		for(var j = 0; j < i; j++) // horizontal attacks
-		  if(state.stacks[j].length != 0)
-		    if(state.stacks[i].length == state.stacks[j].length)
-		        return true;
-		for(var j = 0; j < i; j++) // Diagonal up
-		  if(state.stacks[j].length != 0)
-		    if(state.stacks[i].length == state.stacks[j].length + (j-i))
-		        return true;
-		for(var j = 0; j < i; j++) // Diagonal down
-		  if(state.stacks[j].length != 0)
-		    if(state.stacks[i].length == state.stacks[j].length - (j-i))
-		        return true;
-	}
+        canBeAttacked(state : PuzzleState, i:number): Boolean {
+            for(var j = 0; j < i; j++) // horizontal attacks
+              if(state.stacks[j].length != 0)
+                if(state.stacks[i].length == state.stacks[j].length)
+                    return true;
+            for(var j = 0; j < i; j++) // Diagonal up
+              if(state.stacks[j].length != 0)
+                if(state.stacks[i].length == state.stacks[j].length + (j-i))
+                    return true;
+            for(var j = 0; j < i; j++) // Diagonal down
+              if(state.stacks[j].length != 0)
+                if(state.stacks[i].length == state.stacks[j].length - (j-i))
+                    return true;
+        }
 
-	isAttacked(state : PuzzleState, i:number, mx:number): Boolean {
-		if(state.stacks[i].length == 0)
-		    return false;
-		for(var j = i + 1; j < mx; j++) // horizontal attacks
-		  if(state.stacks[j].length != 0)
-		    if(state.stacks[i].length == state.stacks[j].length)
-		        return true;
-		for(var j = i + 1; j < mx; j++) // Diagonal up
-		  if(state.stacks[j].length != 0)
-		    if(state.stacks[i].length == state.stacks[j].length + (j-i))
-		        return true;
-		for(var j = i + 1; j < mx; j++) // Diagonal down
-		  if(state.stacks[j].length != 0)
-		    if(state.stacks[i].length == state.stacks[j].length - (j-i))
-		        return true;
-	}
-
+        isAttacked(state : PuzzleState, i:number, mx:number): Boolean {
+            if(state.stacks[i].length == 0)
+                return false;
+            for(var j = i + 1; j < mx; j++) // horizontal attacks
+              if(state.stacks[j].length != 0)
+                if(state.stacks[i].length == state.stacks[j].length)
+                    return true;
+            for(var j = i + 1; j < mx; j++) // Diagonal up
+              if(state.stacks[j].length != 0)
+                if(state.stacks[i].length == state.stacks[j].length + (j-i))
+                    return true;
+            for(var j = i + 1; j < mx; j++) // Diagonal down
+              if(state.stacks[j].length != 0)
+                if(state.stacks[i].length == state.stacks[j].length - (j-i))
+                    return true;
+        }
     }
 
     function planFor(nextState : PuzzleState, state: PuzzleState) {

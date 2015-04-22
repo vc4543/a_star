@@ -20,7 +20,6 @@ module Searcher {
     // exported functions, classes and interfaces/types
 
     export function search(space : searchInterface) : Boolean {
-        var mn = space.maximumCostValue();
         var mi = 0;
 
         space.saveCurrentStateIntoFrontier();
@@ -28,6 +27,7 @@ module Searcher {
         var initialCost : number[] = [1]; //initial path cost
 
         do {
+           var mn = space.maximumCostValue();
            for (var i = 0; i < cost.length; i++)
                 if(cost[i] < mn) {
                         mn = cost[i];
@@ -40,14 +40,18 @@ module Searcher {
             space.deleteFrontierElement(mi);
             initialCost.splice(mi,1);
             cost.splice(mi,1);
-            if(space.nextSiblingAndMakeCurrent())
+            if(space.nextChildAndMakeCurrent()) {
+                ++currentCost;
                 initialCost.push(currentCost);
-            else if(space.nextChildAndMakeCurrent())
-                initialCost.push(currentCost + 1);
-            else
-                continue;
-            space.saveCurrentStateIntoFrontier();
-            cost.push(space.getCostOfCurrentState());
+                space.saveCurrentStateIntoFrontier();
+                cost.push(space.getCostOfCurrentState());
+                while(space.nextSiblingAndMakeCurrent()) {
+                    initialCost.push(currentCost);
+                    space.saveCurrentStateIntoFrontier();
+                    cost.push(space.getCostOfCurrentState());
+                }
+            } else
+                space.printDebugInfo('no children');
         } while(space.frontierSize() > 0);
         space.printDebugInfo('No more frontier to traverse');
         return false;
