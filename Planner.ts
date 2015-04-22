@@ -1,5 +1,6 @@
 ///<reference path="Puzzle.ts"/>
 ///<reference path="Interpreter.ts"/>
+///<reference path="Searcher.ts"/>
 
 module Planner {
 
@@ -41,25 +42,33 @@ module Planner {
 
     function planInterpretation(intprt : Interpreter.Literal[][], state : PuzzleState) : string[] {
         var plan : string[] = [];
-        var mn = 10000;
-        var mi = 0;
-        var newfrontier : PuzzleState[] = [];
-        var newcost : number[] = [];
+        if(search(space : searchInterface))
+            return planFor(nextState, state);
+        plan.push("Moving right as I couldnt finish "+mi+" "+frontier.length);
+        plan.push("r");
+        return plan;
+    }
 
-        state.InitialCost = 1; //initial path cost
-        var frontier : PuzzleState[] = [state];
-        var cost : number[] = [getCostOfState(state)];
+    interface searchInterface {
+        var currentState : PuzzleState;
+        var frontier : PuzzleState[] = [];
 
-        // the aStar part , kind of rudimentary as I need to finish TODAY!!! and I dont know tyepscript...
+        getCostOfCurrentState(): number {return getCostOfState(currentState)}
+        isGoalCurrentState(): Boolean {return goal(currentState);}
+
+        saveCurrentStateIntoFrontier(): void {frontier.push(currentState);};
+        nextChildAndMakeCurrent(): Boolean;
+        nextSiblingAndMakeCurrent(): Boolean;
+        deleteFrontierElement(inx: number): void {frontier.splice(inx,1)};
+        setCurrentStateFromFrontier(inx: number): void {currentState=frontier[inx];}
+
+        maximumCostValue(): number {return 10000;}
+
+        printDebugInfo(info : string) : void;
+    }
+
+
         do {
-           for (var i = 0; i < cost.length; i++)
-                if(cost[i] < mn) {
-                        mn = cost[i];
-                        mi = i;
-                }
-            var nextState : PuzzleState = frontier[mi];
-            if(goal(nextState))
-                return planFor(nextState, state);
             var solvingI = nextState.InitialCost;
             for(var i=0; i < solvingI; ++i)
                 if(state.stacks[solvingI].length == 0)
@@ -75,20 +84,8 @@ module Planner {
                     cost.push(getCostOfState(aState));
                 }
             }
-            newfrontier = [];
-            newcost = [];
-            for (var i = 0; i < cost.length; i++)
-               if(i != mi) {
-                    newfrontier.push(frontier[i]);
-                    newcost.push(cost[i]);
-               }
-            frontier = newfrontier;
-            cost = newcost;
 
         } while(frontier.length > 0);
-        plan.push("Moving right as I couldnt finish "+mi+" "+frontier.length);
-        plan.push("r");
-        return plan;
     }
 
     function planFor(nextState : PuzzleState, state: PuzzleState) {
