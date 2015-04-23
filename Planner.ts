@@ -42,7 +42,7 @@ module Planner {
 
     function planInterpretation(intprt : Interpreter.Literal[][], state : PuzzleState) : string[] {
         var plan : string[] = [];
-	var problem : QueensSearch = new QueensSearch(state);
+        var problem : QueensSearch = new QueensSearch(state);
         if(Searcher.search(problem))
             return planFor(problem.currentState, state);
         plan.push("Moving right as I couldnt finish ");
@@ -53,10 +53,40 @@ module Planner {
     class QueensSearch implements Searcher.searchInterface {
         constructor(
             public aState: PuzzleState
-        ) {this.currentState = clone(aState); this.currentState.InitialCost = 0; console.log('start');}
+        ) {this.currentState = clone(aState); this.currentState.InitialCost = 0;
+           this.originalState = aState;
+           console.log('start');}
 
         public currentState : PuzzleState;
-        private frontier : PuzzleState[] = [];
+        private originalState : PuzzleState;
+
+        getMneumonicFromCurrentState(): number {
+            var mne : number = 0;
+            var ex : number = 1;
+            for(var i = 1; i <= this.currentState.stacks.length; i++) {
+                ex *= 9;
+                mne += this.currentState.stacks[i-1].length * ex;
+            }
+            ex *= 9;
+            mne += this.currentState.InitialCost * ex;
+            return mne;
+        }
+
+        setCurrentStateFromMneumonic(mne:number) {
+            var ex : number = 1;
+            this.currentState = clone(this.originalState);
+            for(var i = 1; i <= this.currentState.stacks.length; i++) {
+                ex *= 9;
+                var sz : number = Math.floor((mne / ex) % 9);
+                if(sz == 0)
+                    this.currentState.stacks[i-1].pop();
+                else
+                    for(var j = this.currentState.stacks[i-1].length; j < sz; j++)
+                        this.currentState.stacks[i-1].push("x");
+            }
+            ex *= 9;
+            this.currentState.InitialCost = Math.floor((mne / ex) % 9);
+        }
 
         getCostOfCurrentState(): number {
 	        var cost : number = 0;
@@ -71,8 +101,6 @@ module Planner {
                     return false;
             return true;
         }
-
-        saveCurrentStateIntoFrontier(): void {this.frontier.push(this.currentState);}
 
         nextChildAndMakeCurrent(): Boolean {
             var solvingI = this.currentState.InitialCost + 1;
@@ -103,14 +131,15 @@ module Planner {
             return false;
         }
 
-        deleteFrontierElement(inx: number): void {this.frontier.splice(inx,1);}
-
-        setCurrentStateFromFrontier(inx: number): void {this.currentState=this.frontier[inx];}
-
         maximumCostValue(): number {return 10000;}
-        frontierSize(): number {return this.frontier.length;}
 
         printDebugInfo(info : string) : void {console.log(info);}
+        printDebugMne(info : string, mne : number, state : PuzzleState) : void {
+            var str = ' mne = ' + mne + ' is ';
+            for(var i = 0; i < this.currentState.stacks.length; i++)
+                str += ' ' + i + ' (' + this.currentState.stacks[i].length +'),'
+            console.log(info + str);
+        }
 
         canBeAttacked(state : PuzzleState, i:number): Boolean {
             for(var j = 0; j < i; j++) // horizontal attacks
