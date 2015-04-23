@@ -1,6 +1,6 @@
 module Searcher {
 
-    interface searchInterface {
+    export interface searchInterface {
         getCostOfCurrentState(): number;
         isGoalCurrentState(): Boolean;
 
@@ -11,6 +11,7 @@ module Searcher {
         setCurrentStateFromFrontier(inx: number): void;
 
         maximumCostValue(): number;
+        frontierSize(): number;
 
         printDebugInfo(info : string) : void;
     }
@@ -33,7 +34,7 @@ module Searcher {
                         mi = i;
                 }
             space.setCurrentStateFromFrontier(mi);
-            if(space.isGoalCurrentState()
+            if(space.isGoalCurrentState())
                 return true;
             var solvingI = initialCost[mi];
             space.deleteFrontierElement(mi);
@@ -47,7 +48,7 @@ module Searcher {
                 continue;
             space.saveCurrentStateIntoFrontier();
             cost.push(space.getCostOfCurrentState());
-        } while(frontier.length > 0);
+        } while(space.frontierSize() > 0);
         space.printDebugInfo('No more frontier to traverse');
         return false;
     }
