@@ -53,7 +53,7 @@ module Planner {
     class QueensSearch implements Searcher.searchInterface {
 	constructor(
 		public aState: PuzzleState
-	) {this.currentState = clone(aState); this.currentState.InitialCost = 0;}
+	) {this.currentState = clone(aState); this.currentState.InitialCost = 0; console.log('start');}
 
         public currentState : PuzzleState;
         private frontier : PuzzleState[] = [];
@@ -80,6 +80,7 @@ module Planner {
                     solvingI++;
             this.currentState = clone(this.currentState);
             ++this.currentState.InitialCost;
+console.log('checking '+this.currentState.InitialCost);
 	    if(this.currentState.InitialCost>this.currentState.stacks.length)
 		return false;
 	    return this.nextSiblingAndMakeCurrent();
@@ -91,6 +92,7 @@ module Planner {
                 aState.stacks[solvingI].push("x");
                 if(!this.canBeAttacked(aState, solvingI)) { //prune
 		    this.currentState = aState;
+console.log('child col ' +solvingI + ' pos ' + aState.stacks[solvingI].length);
 		    return true;
                 }
             }
@@ -102,7 +104,7 @@ module Planner {
         maximumCostValue(): number {return 10000;}
         frontierSize(): number {return this.frontier.length;}
 
-        printDebugInfo(info : string) : void {}
+        printDebugInfo(info : string) : void {console.log(info);}
 
 	canBeAttacked(state : PuzzleState, i:number): Boolean {
 		for(var j = 0; j < i; j++) // horizontal attacks

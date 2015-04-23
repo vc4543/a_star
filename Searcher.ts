@@ -36,14 +36,14 @@ module Searcher {
             space.setCurrentStateFromFrontier(mi);
             if(space.isGoalCurrentState())
                 return true;
-            var solvingI = initialCost[mi];
+            var currentCost = initialCost[mi];
             space.deleteFrontierElement(mi);
             initialCost.splice(mi,1);
             cost.splice(mi,1);
             if(space.nextSiblingAndMakeCurrent())
-                initialCost.push(solvingI);
+                initialCost.push(currentCost);
             else if(space.nextChildAndMakeCurrent())
-                initialCost.push(solvingI + 1);
+                initialCost.push(currentCost + 1);
             else
                 continue;
             space.saveCurrentStateIntoFrontier();
