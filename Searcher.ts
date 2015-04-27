@@ -1,3 +1,5 @@
+/// <reference path="lib/collections.ts" />
+
 module Searcher {
 
     export interface searchInterface {
@@ -73,6 +75,8 @@ module Searcher {
         private frontier : number[] = [];
 
         getSmallestCost(max:number): number {
+var x = new collections.Set<number>(); 
+x.add(123);
            var mi = 0;
            var mn = max;
            for (var i = 0; i < this.cost.length; i++)
