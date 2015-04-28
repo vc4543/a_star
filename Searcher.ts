@@ -12,18 +12,13 @@ module Searcher {
         nextChildAndMakeCurrent(): Boolean;
         nextSiblingAndMakeCurrent(): Boolean;
 
-        maximumCostValue(): number;
-
         printDebugInfo(info : string) : void;
     }
 
+    export interface FrontierEntry {initialCost:number; cost:number; mneumonic:number;}
+
     export interface frontierInterface {
-        getSmallestCost(max:number): number;
-
-        getMneumonicInInx(inx:number): number;
-        getInitialCostInInx(inx:number): number;
-
-        deleteFrontierInInx(inx:number): void;
+        getSmallestCost(): FrontierEntry;
         pushFrontierElement(initialCost:number, cost:number, mne:number): void;
 
         frontierSize(): number;
@@ -38,12 +33,11 @@ module Searcher {
                                      space.getCostOfCurrentState(),
                                      space.getMneumonicFromCurrentState());
         do {
-            var mi = frontier.getSmallestCost(space.maximumCostValue());
-            space.setCurrentStateFromMneumonic(frontier.getMneumonicInInx(mi));
+            var mi = frontier.getSmallestCost();
+            space.setCurrentStateFromMneumonic(mi.mneumonic);
             if(space.isGoalCurrentState())
                 return true;
-            var currentCost = frontier.getInitialCostInInx(mi);
-            frontier.deleteFrontierInInx(mi);
+            var currentCost = mi.initialCost;
             if(space.nextChildAndMakeCurrent()) {
                 ++currentCost;
                 frontier.pushFrontierElement(currentCost,
@@ -69,37 +63,26 @@ module Searcher {
 
     //////////////////////////////////////////////////////////////////////
     // private functions and classes
+
+    function compare(a, b) {
+        return -(a.cost + a.initialCost - b.cost - b.initialCost); // its minimization
+    }
+
     class frontierQueue implements Searcher.frontierInterface {
-        private initialCost : number[] = [];
-        private cost : number[] = [];
-        private frontier : number[] = [];
+        constructor() {}
 
-        getSmallestCost(max:number): number {
-var x = new collections.Set<number>(); 
-x.add(123);
-           var mi = 0;
-           var mn = max;
-           for (var i = 0; i < this.cost.length; i++)
-                if(this.cost[i] < mn) {
-                        mn = this.cost[i];
-                        mi = i;
-                }
-           return mi;
+        private frontier : collections.PriorityQueue<FrontierEntry>
+                    = new collections.PriorityQueue<FrontierEntry>(compare);
+
+        getSmallestCost(): FrontierEntry {
+            return this.frontier.dequeue();
         }
-        deleteFrontierInInx(inx:number): void {
-            this.frontier.splice(inx,1);
-            this.initialCost.splice(inx,1);
-            this.cost.splice(inx,1);
-        }
+
         pushFrontierElement(initialCost:number, cost:number, mne:number): void {
-            this.frontier.push(mne);
-            this.initialCost.push(initialCost);
-            this.cost.push(cost);
+            this.frontier.add({initialCost:initialCost, cost:cost, mneumonic:mne});
         }
 
-        getMneumonicInInx(inx:number): number   {return this.frontier[inx];}
-        getInitialCostInInx(inx:number): number {return this.initialCost[inx];}
-        frontierSize(): number                  {return this.frontier.length;}
+        frontierSize(): number                  {return this.frontier.size();}
     }
 
 }

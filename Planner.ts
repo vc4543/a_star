@@ -131,8 +131,6 @@ module Planner {
             return false;
         }
 
-        maximumCostValue(): number {return 10000;}
-
         printDebugInfo(info : string) : void {console.log(info);}
         printDebugMne(info : string, mne : number, state : PuzzleState) : void {
             var str = ' mne = ' + mne + ' is ';
